@@ -35,10 +35,10 @@ export function mapError(err: unknown): { kind: FailureKind; message: string } {
 
 /** One image in, analysis + six variants + captions out. Retries once on malformed JSON. */
 export async function generateForImage(a: GenerateArgs): Promise<GenerateOutcome> {
-  const client = new Anthropic({ apiKey: a.apiKey, dangerouslyAllowBrowser: true, maxRetries: 2 });
-  const userPrompt = buildUserPrompt(a.context);
   let usage = EMPTY_USAGE;
   try {
+    const client = new Anthropic({ apiKey: a.apiKey, dangerouslyAllowBrowser: true, maxRetries: 2 });
+    const userPrompt = buildUserPrompt(a.context);
     for (let attempt = 0; attempt < 2; attempt++) {
       const res = await client.beta.messages.parse(
         {
