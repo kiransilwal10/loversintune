@@ -20,7 +20,7 @@ describe('normalizeResult', () => {
     expect(normalizeResult(raw).best_variant_id).toBe('v4');
   });
   it('strips quotation marks from quotes and lines', () => {
-    const raw = { ...fixture, variants: fixture.variants.map((v) => ({ ...v, quote: `"${v.quote}"`, lines: v.lines.map((l) => `"${l}"`) })) };
+    const raw = { ...fixture, variants: fixture.variants.map((v) => ({ ...v, quote: `"${v.quote}"`, lines: v.lines.map((l) => `“${l}”`) })) };
     const r = normalizeResult(raw);
     expect(r.variants[0].quote).toBe(fixture.variants[0].quote);
     expect(r.variants[0].lines).toEqual(fixture.variants[0].lines);
@@ -43,6 +43,6 @@ describe('normalizeResult', () => {
 
 describe('cleanQuote', () => {
   it('removes quotation marks and collapses whitespace', () => {
-    expect(cleanQuote('  "hello   there" ')).toBe('hello there');
+    expect(cleanQuote('  “hello   there” ')).toBe('hello there');
   });
 });
