@@ -1,0 +1,76 @@
+{
+  "analysis": {
+    "subject": "a couple sharing one umbrella on a rain-soaked city street at night, seen from behind",
+    "setting": "downtown street at night in heavy rain, neon and headlights reflecting on wet asphalt",
+    "mood_words": ["tender", "cinematic", "quiet", "nostalgic", "close"],
+    "palette": { "dominant_hex": ["#0f1a2b", "#3a4b6e", "#d98a5a", "#f2e6d8"], "is_dark": true },
+    "focal_point": { "x": 0.5, "y": 0.55 },
+    "text_zone": "top",
+    "text_tone": "light",
+    "vibe_summary": "Two people building a small dry world for each other while the whole city drips around them."
+  },
+  "variants": [
+    {
+      "id": "v1", "mood": "soft",
+      "quote": "one umbrella and suddenly the whole city is dry enough",
+      "lines": ["one umbrella", "and suddenly the whole city", "is dry enough"],
+      "fit_score": 9,
+      "why_it_fits": "The shared umbrella is the literal subject; the line turns it into shelter.",
+      "style_preset": "editorial",
+      "caption_tiktok": "the rain wasn't the point. who you walked through it with was.\nsend this to your umbrella person\n#couplegoals #softlove #rainydays #couplesaesthetic",
+      "caption_instagram": "we never made it to the restaurant. we didn't need to.\n\nsome nights the walk is the whole date. tell me: rain date or stay-in date?\n\nsend this to the one who always holds the umbrella over you.\n\n#couplegoals #relationshipquotes #lovequotes #softlove #lovenotes #rainydays #couplesaesthetic #pinterestcouple #datenight #cityatnight #loveletters #quietlove"
+    },
+    {
+      "id": "v2", "mood": "longing",
+      "quote": "i still walk on the left so there's room for you",
+      "lines": ["i still walk on the left", "so there's room for you"],
+      "fit_score": 8,
+      "why_it_fits": "Two figures side by side make the empty-space idea land.",
+      "style_preset": "serif",
+      "caption_tiktok": "habits outlast people. this one refuses to leave.\ntag someone who knows\n#longdistancelove #missingyou #relationshipquotes #couplesaesthetic",
+      "caption_instagram": "some habits are just love with nowhere to go.\n\nwhat's the one thing you still do like they're beside you?\n\ntag the person who should be under this umbrella.\n\n#longdistancelove #missingyou #relationshipquotes #lovequotes #softlove #lovenotes #couplesaesthetic #pinterestcouple #rainydays #quietlove #loveletters #distance"
+    },
+    {
+      "id": "v3", "mood": "sad",
+      "quote": "the streetlights still come on for two",
+      "lines": ["the streetlights", "still come on", "for two"],
+      "fit_score": 8,
+      "why_it_fits": "Picks the lights off the wet street and gives them the ache.",
+      "style_preset": "typewriter",
+      "caption_tiktok": "the city didn't get the memo.\nsend this to someone who's walking home alone tonight\n#heartbreak #sadquotes #rainydays #relationshipquotes",
+      "caption_instagram": "everything kept its routine except us.\n\ndo you take the long way home too?\n\nsend this to the one who needs a text tonight.\n\n#sadquotes #heartbreak #relationshipquotes #lovequotes #rainydays #cityatnight #lovenotes #softlove #quietlove #missingyou #loveletters #couplesaesthetic"
+    },
+    {
+      "id": "v4", "mood": "flirty",
+      "quote": "walk closer. the umbrella's small and i'm not sorry",
+      "lines": ["walk closer.", "the umbrella's small", "and i'm not sorry"],
+      "fit_score": 7,
+      "why_it_fits": "Uses the one umbrella as the excuse; playful and specific.",
+      "style_preset": "handwritten",
+      "caption_tiktok": "the umbrella is small on purpose.\ntag your favourite excuse\n#flirty #couplegoals #rainydays #couplesaesthetic",
+      "caption_instagram": "i've owned bigger umbrellas. i chose this one.\n\nwhat's your favourite excuse to get closer?\n\ntag the person you'd share a too-small umbrella with.\n\n#flirty #couplegoals #relationshipquotes #lovequotes #couplesaesthetic #pinterestcouple #rainydays #datenight #softlove #lovenotes #cutecouple #loveletters"
+    },
+    {
+      "id": "v5", "mood": "devoted",
+      "quote": "any weather, same side of the street",
+      "lines": ["any weather,", "same side", "of the street"],
+      "fit_score": 7,
+      "why_it_fits": "The rain becomes every kind of weather; commitment without saying forever.",
+      "style_preset": "minimal",
+      "caption_tiktok": "not a promise. a habit.\ntag your same-side-of-the-street person\n#couplegoals #relationshipquotes #devotion #couplesaesthetic",
+      "caption_instagram": "we don't do grand promises. we do this, every day.\n\nwhat's your small every-day promise?\n\nsend this to the one who always ends up beside you.\n\n#couplegoals #relationshipquotes #lovequotes #devotion #softlove #lovenotes #couplesaesthetic #pinterestcouple #rainydays #quietlove #loveletters #foreverkindoflove"
+    },
+    {
+      "id": "v6", "mood": "spicy",
+      "quote": "we're soaked anyway. lose the umbrella",
+      "lines": ["we're soaked anyway.", "lose the umbrella"],
+      "fit_score": 6,
+      "why_it_fits": "Turns the rain into a dare; suggestive without saying anything explicit.",
+      "style_preset": "minimal",
+      "caption_tiktok": "practical decision. definitely practical.\ntag the person who'd say yes\n#flirty #rainydays #couplegoals #couplesaesthetic",
+      "caption_instagram": "there's dry, and there's this.\n\nwould you lose the umbrella?\n\nsend this to the one who'd say yes without asking why.\n\n#flirty #couplegoals #relationshipquotes #lovequotes #rainydays #couplesaesthetic #pinterestcouple #datenight #softlove #cutecouple #loveletters #lovenotes"
+    }
+  ],
+  "best_variant_id": "v1",
+  "alt_text": "A couple walks away from the camera under one umbrella on a rainy city street at night, with orange and blue lights reflecting off the wet road."
+}
