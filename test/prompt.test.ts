@@ -22,7 +22,7 @@ describe('EXEMPLARS', () => {
       expect(EXEMPLARS[mood].length).toBeGreaterThanOrEqual(3);
       for (const q of EXEMPLARS[mood]) {
         expect(q.split(/\s+/).length).toBeLessThanOrEqual(16);
-        expect(q).not.toMatch(/["""]/);
+        expect(q).not.toMatch(/["""“”]/);
         expect(q).not.toMatch(/\p{Extended_Pictographic}/u);
       }
     }
