@@ -105,7 +105,7 @@ export async function renderPoster(input: RenderInput, opts: RenderOptions): Pro
     ctx.save();
     ctx.globalAlpha = 0.55;
     ctx.font = cssFont(spec, px * 1.8);
-    ctx.fillText('"', cx, block.y + px * 0.1);
+    ctx.fillText("\u201C", cx, block.y + px * 0.1);
     ctx.restore();
   }
   ctx.font = cssFont(spec, px);
