@@ -1,4 +1,4 @@
-import { useEffect, useMemo, useRef, useState } from 'react';
+import { useEffect, useRef, useState } from 'react';
 import { PRESETS, PRESET_ORDER, type PresetId } from '../lib/layout';
 import type { Settings } from '../lib/settings';
 import { MOOD_LABELS } from '../lib/labels';
@@ -27,9 +27,23 @@ const STATUS_TEXT: Record<CardStatus, string> = {
   ready: 'Ready', error: 'Error', declined: 'Declined',
 };
 
+/**
+ * Data URL for the thumbnail, read via FileReader rather than `URL.createObjectURL`.
+ * A blob URL assigned to `<img src>` in the same synchronous render that creates it can lose a
+ * race against Chromium's async blob-registry IPC (renderer → browser process): the image fetch
+ * sometimes dispatches before the registration lands, failing with `net::ERR_FILE_NOT_FOUND`.
+ * Data URLs are parsed inline with no such round trip, so no race is possible.
+ */
 function useObjectUrl(file: File): string {
-  const url = useMemo(() => URL.createObjectURL(file), [file]);
-  useEffect(() => () => URL.revokeObjectURL(url), [url]);
+  const [url, setUrl] = useState('');
+  useEffect(() => {
+    setUrl('');
+    let cancelled = false;
+    const reader = new FileReader();
+    reader.onload = () => { if (!cancelled && typeof reader.result === 'string') setUrl(reader.result); };
+    reader.readAsDataURL(file);
+    return () => { cancelled = true; };
+  }, [file]);
   return url;
 }
 
@@ -57,7 +71,7 @@ export function PosterCard(p: Props) {
           <div ref={previewRef} className="poster" />
         ) : (
           <div className="poster placeholder">
-            <img src={thumb} alt="" />
+            {thumb && <img src={thumb} alt="" />}
             <span className="placeholder-text">{p.card.status === 'generating' && <span className="spinner" />}{STATUS_TEXT[p.card.status]}</span>
           </div>
         )}
