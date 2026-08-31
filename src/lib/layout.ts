@@ -112,3 +112,88 @@ export function chooseZone(scores: Record<Zone, number>, suggested: Zone): Zone 
   const best = ZONES.reduce((a, b) => (scores[b] < scores[a] ? b : a));
   return scores[suggested] - scores[best] > SUGGESTION_TOLERANCE ? best : suggested;
 }
+
+// ---------- text fitting ----------
+export type Measure = (text: string, px: number) => number;
+export interface FitArgs {
+  lines: string[]; quote: string; maxWidth: number; maxHeight: number;
+  basePx: number; minPx: number; lineHeight: number; maxLines: number; measure: Measure;
+}
+const SUGGESTED_FLOOR = 0.78;
+const FIT_STEP = 2;
+
+export function wrapWords(text: string, px: number, maxWidth: number, measure: Measure): string[] {
+  const words = text.split(/\s+/).filter(Boolean);
+  const lines: string[] = [];
+  let cur = '';
+  for (const w of words) {
+    const candidate = cur ? `${cur} ${w}` : w;
+    if (!cur || measure(candidate, px) <= maxWidth) cur = candidate;
+    else { lines.push(cur); cur = w; }
+  }
+  if (cur) lines.push(cur);
+  return lines;
+}
+
+export function fitText(a: FitArgs): { fontPx: number; lines: string[] } {
+  const fits = (lines: string[], px: number) =>
+    lines.length > 0 && lines.length <= a.maxLines &&
+    lines.every((l) => a.measure(l, px) <= a.maxWidth) &&
+    lines.length * px * a.lineHeight <= a.maxHeight;
+  const floor = Math.max(a.minPx, Math.round(a.basePx * SUGGESTED_FLOOR));
+  for (let px = a.basePx; px >= floor; px -= FIT_STEP) {
+    if (fits(a.lines, px)) return { fontPx: px, lines: a.lines };
+  }
+  for (let px = a.basePx; px >= a.minPx; px -= FIT_STEP) {
+    const lines = wrapWords(a.quote, px, a.maxWidth, a.measure);
+    if (fits(lines, px)) return { fontPx: px, lines };
+  }
+  return { fontPx: a.minPx, lines: wrapWords(a.quote, a.minPx, a.maxWidth, a.measure) };
+}
+
+// ---------- contrast & tone ----------
+export const TONES: Record<Tone, { text: string; textLuma: number; scrim: string; scrimLuma: number; shadow: boolean }> = {
+  light: { text: '#FAF7F2', textLuma: 0.93, scrim: '#000000', scrimLuma: 0, shadow: true },
+  dark: { text: '#1E1B18', textLuma: 0.012, scrim: '#F5EEE6', scrimLuma: 0.86, shadow: false },
+};
+const CONTRAST_TARGET = 4.5;
+const LIGHTER_TARGET = 3.5;
+const OPACITY_STEP = 0.05;
+const OPACITY_CAP = 0.75;
+const FLIP_IF_ABOVE = 0.6;
+const FLIP_IF_OTHER_BELOW = 0.4;
+
+const round2 = (v: number) => Math.round(v * 100) / 100;
+
+export function contrastRatio(l1: number, l2: number): number {
+  const [hi, lo] = l1 > l2 ? [l1, l2] : [l2, l1];
+  return (hi + 0.05) / (lo + 0.05);
+}
+
+export function blendLuma(bg: number, overlay: number, alpha: number): number {
+  return bg * (1 - alpha) + overlay * alpha;
+}
+
+/** Smallest opacity ≥ start (in `step`s) at which text reaches `target` contrast over the scrimmed zone; `cap` if never. */
+export function scrimOpacityFor(a: { zoneLuma: number; textLuma: number; scrimLuma: number; start: number; step?: number; cap?: number; target?: number }): number {
+  const step = a.step ?? OPACITY_STEP, cap = a.cap ?? OPACITY_CAP, target = a.target ?? CONTRAST_TARGET;
+  for (let o = a.start; o <= cap + 1e-9; o += step) {
+    if (contrastRatio(blendLuma(a.zoneLuma, a.scrimLuma, o), a.textLuma) >= target) return round2(o);
+  }
+  return cap;
+}
+
+export function baseScrimOpacity(busyness: number, adjust: ScrimAdjust): number {
+  const delta = adjust === 'lighter' ? -0.12 : adjust === 'stronger' ? 0.15 : 0;
+  return round2(clamp(0.18 + busyness * 0.5 + delta, 0.06, OPACITY_CAP));
+}
+
+export function chooseTone(a: { zoneLuma: number; busyness: number; suggested: Tone; adjust: ScrimAdjust }): { tone: Tone; opacity: number } {
+  const start = baseScrimOpacity(a.busyness, a.adjust);
+  const target = a.adjust === 'lighter' ? LIGHTER_TARGET : CONTRAST_TARGET;
+  const need = (t: Tone) => scrimOpacityFor({ zoneLuma: a.zoneLuma, textLuma: TONES[t].textLuma, scrimLuma: TONES[t].scrimLuma, start, target });
+  const other: Tone = a.suggested === 'light' ? 'dark' : 'light';
+  const s = need(a.suggested);
+  const o = need(other);
+  return s > FLIP_IF_ABOVE && o <= FLIP_IF_OTHER_BELOW ? { tone: other, opacity: o } : { tone: a.suggested, opacity: s };
+}
