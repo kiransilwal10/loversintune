@@ -165,7 +165,7 @@ If enabled (default on), the brand handle is drawn as an attribution line under 
 
 ### 5.7 Export
 
-`canvas.toBlob`: JPEG quality 0.92 by default (~0.4–0.8 MB; platforms recompress anyway), PNG optional in settings. Previews are rendered at half size for speed; downloads always render at full size.
+`canvas.toBlob`: JPEG quality 0.92 by default (~0.4–0.8 MB; platforms recompress anyway), PNG optional in settings. Posters are always rendered at full output size (one `drawImage` plus text — fast enough); the preview is the same canvas scaled down with CSS, so what you see is exactly what downloads.
 
 ## 6. UI
 
