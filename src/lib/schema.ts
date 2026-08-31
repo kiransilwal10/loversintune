@@ -51,7 +51,7 @@ const MIN_VARIANTS = 3;
 const clamp01 = (v: number) => Math.min(1, Math.max(0, v));
 
 export function cleanQuote(s: string): string {
-  return s.replace(/["""„«»]/g, '').replace(/\s+/g, ' ').trim();
+  return s.replace(/[\u0022\u201C\u201D\u201E\u00AB\u00BB]/g, '').replace(/\s+/g, ' ').trim();
 }
 
 /** Validate Claude's JSON and repair the fuzzy bits. Throws if the result is unusable. */
