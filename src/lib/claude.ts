@@ -40,26 +40,37 @@ export async function generateForImage(a: GenerateArgs): Promise<GenerateOutcome
     const client = new Anthropic({ apiKey: a.apiKey, dangerouslyAllowBrowser: true, maxRetries: 2 });
     const userPrompt = buildUserPrompt(a.context);
     for (let attempt = 0; attempt < 2; attempt++) {
-      const res = await client.beta.messages.parse(
-        {
-          model: MODEL,
-          max_tokens: MAX_TOKENS,
-          betas: [FALLBACK_BETA],
-          fallbacks: 'default',
-          system: [{ type: 'text', text: SYSTEM_PROMPT, cache_control: { type: 'ephemeral' } }],
-          messages: [
-            {
-              role: 'user',
-              content: [
-                { type: 'image', source: { type: 'base64', media_type: a.image.mediaType, data: a.image.base64 } },
-                { type: 'text', text: userPrompt },
-              ],
-            },
-          ],
-          output_config: { effort: a.effort, format: OUTPUT_FORMAT },
-        },
-        { signal: a.signal },
-      );
+      let res;
+      try {
+        res = await client.beta.messages.parse(
+          {
+            model: MODEL,
+            max_tokens: MAX_TOKENS,
+            betas: [FALLBACK_BETA],
+            fallbacks: 'default',
+            system: [{ type: 'text', text: SYSTEM_PROMPT, cache_control: { type: 'ephemeral' } }],
+            messages: [
+              {
+                role: 'user',
+                content: [
+                  { type: 'image', source: { type: 'base64', media_type: a.image.mediaType, data: a.image.base64 } },
+                  { type: 'text', text: userPrompt },
+                ],
+              },
+            ],
+            output_config: { effort: a.effort, format: OUTPUT_FORMAT },
+          },
+          { signal: a.signal },
+        );
+      } catch (e) {
+        // The SDK throws AnthropicError (not APIError) on malformed JSON / schema
+        // mismatch instead of resolving with a null parsed_output — retry once.
+        if (e instanceof Anthropic.AnthropicError && !(e instanceof Anthropic.APIError)) {
+          if (attempt === 0) continue;
+          return { ok: false, kind: 'invalid_output', message: `Claude's answer did not match the expected shape: ${e.message}`, usage };
+        }
+        throw e; // real API errors go to mapError via the outer catch
+      }
       usage = addUsage(usage, {
         input: res.usage.input_tokens,
         output: res.usage.output_tokens,

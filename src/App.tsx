@@ -18,6 +18,7 @@ const params = new URLSearchParams(window.location.search);
 const FIXTURE_MODE = params.get('fixture') === '1';
 const GUIDES = params.get('guides') === '1';
 const queue = createQueue(2);
+const KEY_SETTLE_MS = 800;
 
 async function fixtureOutcome(signal: AbortSignal): Promise<GenerateOutcome> {
   await new Promise((r) => setTimeout(r, 400));
@@ -35,10 +36,12 @@ export function App() {
   const [toast, setToast] = useState<string | null>(null);
   const [zipping, setZipping] = useState(false);
   const tasks = useRef(new Map<string, QueuedTask<GenerateOutcome>>());
+  const toastTimer = useRef<number | undefined>(undefined);
 
   const showToast = useCallback((message: string) => {
+    window.clearTimeout(toastTimer.current);
     setToast(message);
-    window.setTimeout(() => setToast(null), 3200);
+    toastTimer.current = window.setTimeout(() => setToast(null), 3200);
   }, []);
 
   const updateSettings = (next: Settings) => {
@@ -93,10 +96,14 @@ export function App() {
     fresh.forEach((c) => { void startCard(c); });
   }, [startCard, showToast]);
 
-  // Cards that were waiting for a key start as soon as one is saved.
+  // Cards that were waiting for a key start once typing settles (avoids a
+  // 1-character key firing a request on every keystroke while typing it in).
   useEffect(() => {
     if (!settings.apiKey) return;
-    for (const c of cardsRef.current) if (c.status === 'waiting_key' && c.prepared) void generate(c.id, c.prepared);
+    const t = window.setTimeout(() => {
+      for (const c of cardsRef.current) if (c.status === 'waiting_key' && c.prepared) void generate(c.id, c.prepared);
+    }, KEY_SETTLE_MS);
+    return () => window.clearTimeout(t);
   }, [settings.apiKey, generate]);
 
   // Paste an image from the clipboard (Pinterest → copy image → ⌘V here).
@@ -111,7 +118,7 @@ export function App() {
 
   const retry = (card: Card) => { if (card.prepared) void generate(card.id, card.prepared); else void startCard(card); };
   const regenerate = (card: Card) => { if (card.prepared) void generate(card.id, card.prepared, card.result?.variants.map((v) => v.quote) ?? []); };
-  const remove = (card: Card) => { tasks.current.get(card.id)?.cancel(); dispatch({ type: 'remove', id: card.id }); };
+  const remove = (card: Card) => { tasks.current.get(card.id)?.cancel(); card.prepared?.bitmap.close(); dispatch({ type: 'remove', id: card.id }); };
   const downloadAll = async () => {
     setZipping(true);
     try { await downloadBatchZip(cardsRef.current, settingsRef.current); }
