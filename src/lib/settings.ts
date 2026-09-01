@@ -20,8 +20,8 @@ export interface Settings {
 export const SETTINGS_KEY = 'lit.settings.v1';
 export const DEFAULT_SETTINGS: Settings = {
   apiKey: '',
-  handle: '@loversintune',
-  appName: 'Lovers in Tune',
+  handle: '',
+  appName: '',
   ctaStyle: 'soft',
   moodEmphasis: 'balanced',
   effort: 'high',

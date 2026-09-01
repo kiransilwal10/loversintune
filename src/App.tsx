@@ -50,7 +50,7 @@ export function App() {
     saveSettings(next);
   };
 
-  const generate = useCallback(async (id: string, prepared: PreparedImage, avoid: string[] = []) => {
+  const generate = useCallback(async (id: string, prepared: PreparedImage, avoid: string[] = [], feedback = '') => {
     if (tasks.current.has(id)) return; // already in flight (StrictMode double effects, double clicks)
     const s = settingsRef.current;
     if (!s.apiKey && !FIXTURE_MODE) { dispatch({ type: 'status', id, status: 'waiting_key' }); return; }
@@ -61,7 +61,7 @@ export function App() {
         : generateForImage({
             apiKey: s.apiKey, effort: s.effort,
             image: { base64: prepared.apiBase64, mediaType: prepared.apiMediaType },
-            context: { handle: s.handle, appName: s.appName, ctaStyle: s.ctaStyle, moodEmphasis: s.moodEmphasis, avoid },
+            context: { handle: s.handle, appName: s.appName, ctaStyle: s.ctaStyle, moodEmphasis: s.moodEmphasis, avoid, feedback },
             signal,
           }),
     );
@@ -117,7 +117,11 @@ export function App() {
   }, [addFiles]);
 
   const retry = (card: Card) => { if (card.prepared) void generate(card.id, card.prepared); else void startCard(card); };
-  const regenerate = (card: Card) => { if (card.prepared) void generate(card.id, card.prepared, card.result?.variants.map((v) => v.quote) ?? []); };
+  const regenerate = (card: Card, withFeedback: boolean) => {
+    if (!card.prepared) return;
+    const previous = card.result?.variants.map((v) => v.quote) ?? [];
+    void generate(card.id, card.prepared, previous, withFeedback ? card.feedback : '');
+  };
   const remove = (card: Card) => { tasks.current.get(card.id)?.cancel(); card.prepared?.bitmap.close(); dispatch({ type: 'remove', id: card.id }); };
   const downloadAll = async () => {
     setZipping(true);
@@ -169,7 +173,7 @@ export function App() {
             onSelectVariant={(variantId) => dispatch({ type: 'select_variant', id: card.id, variantId })}
             onOption={(patch) => dispatch({ type: 'set_option', id: card.id, patch })}
             onRetry={() => retry(card)}
-            onRegenerate={() => regenerate(card)}
+            onRegenerate={(withFeedback) => regenerate(card, withFeedback)}
             onRemove={() => remove(card)}
             onDownload={(preset) => guard(() => downloadPoster(card, preset, settingsRef.current))}
             onDownloadZip={() => guard(() => downloadCardZip(card, settingsRef.current))}

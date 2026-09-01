@@ -43,4 +43,17 @@ describe('buildUserPrompt', () => {
     expect(p).toContain('Do not reuse');
     expect(p).toContain('- the rain still sounds like your name');
   });
+  it('adds the user feedback section only when feedback is given', () => {
+    expect(buildUserPrompt(ctx)).not.toContain('Feedback from the user');
+    expect(buildUserPrompt({ ...ctx, feedback: '   ' })).not.toContain('Feedback from the user');
+    const p = buildUserPrompt({ ...ctx, feedback: 'sadder, mention the rain' });
+    expect(p).toContain('Feedback from the user');
+    expect(p).toContain('sadder, mention the rain');
+  });
+  it('degrades gracefully when no handle or app name is set', () => {
+    const p = buildUserPrompt({ ...ctx, handle: '', appName: '', ctaStyle: 'brand' });
+    expect(p).toContain('account handle: (none)');
+    expect(p).not.toContain('""');
+    expect(p).toMatch(/CTA style: soft/);
+  });
 });

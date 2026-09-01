@@ -1,7 +1,7 @@
 import { PRESETS, PRESET_ORDER, type PresetId } from './layout';
 import { renderPoster, canvasToBlob } from './render';
 import { buildZip, captionsMarkdown, posterFilename, saveBlob, type CaptionEntry, type ZipEntry } from './download';
-import { selectedVariant, SIZE_SCALE, type Card } from '../state/cards';
+import { selectedVariant, resolveAttribution, SIZE_SCALE, type Card } from '../state/cards';
 import type { Settings } from './settings';
 
 export async function renderForCard(card: Card, presetId: PresetId, settings: Settings, guides = false): Promise<HTMLCanvasElement> {
@@ -15,7 +15,7 @@ export async function renderForCard(card: Card, presetId: PresetId, settings: Se
       zone: card.zone,
       sizeScale: SIZE_SCALE[card.size],
       scrimAdjust: card.scrim,
-      attribution: settings.attribution && settings.handle.trim() ? settings.handle.trim() : null,
+      attribution: resolveAttribution(card, settings),
       guides,
     },
   );

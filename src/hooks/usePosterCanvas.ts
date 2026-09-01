@@ -17,5 +17,5 @@ export function usePosterCanvas(container: RefObject<HTMLDivElement | null>, car
     return () => { cancelled = true; };
     // The effect reads `card` and `settings`, but only these fields change the poster.
     // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [ready, card.result, card.selectedVariantId, card.style, card.zone, card.size, card.scrim, presetId, settings.attribution, settings.handle, guides]);
+  }, [ready, card.result, card.selectedVariantId, card.style, card.zone, card.size, card.scrim, card.posterLine, presetId, settings.attribution, settings.handle, guides]);
 }

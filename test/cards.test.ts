@@ -1,7 +1,8 @@
 import { describe, it, expect } from 'vitest';
 import fixture from './fixtures/sample-result.json';
-import { newCards, uniqueStem, cardsReducer, selectedVariant, SIZE_SCALE } from '../src/state/cards';
+import { newCards, uniqueStem, cardsReducer, selectedVariant, resolveAttribution, SIZE_SCALE } from '../src/state/cards';
 import { normalizeResult } from '../src/lib/schema';
+import { DEFAULT_SETTINGS } from '../src/lib/settings';
 
 const file = (name: string) => new File(['x'], name, { type: 'image/jpeg' });
 const usage = { input: 10, output: 20, cacheRead: 0, cacheWrite: 0 };
@@ -47,5 +48,20 @@ describe('cards state', () => {
   });
   it('exposes size multipliers', () => {
     expect(SIZE_SCALE).toEqual({ S: 0.85, M: 1, L: 1.15 });
+  });
+  it('new cards start with an empty poster line and feedback; set_option patches both', () => {
+    const [c] = newCards([file('a.jpg')], []);
+    expect(c.posterLine).toBe('');
+    expect(c.feedback).toBe('');
+    const state = cardsReducer([c], { type: 'set_option', id: c.id, patch: { posterLine: '@her', feedback: 'sadder' } });
+    expect(state[0]).toMatchObject({ posterLine: '@her', feedback: 'sadder' });
+  });
+  it('resolveAttribution prefers the card line, then the settings handle, and honours the toggle', () => {
+    const [c] = newCards([file('a.jpg')], []);
+    const settings = { ...DEFAULT_SETTINGS, handle: '@global', attribution: true };
+    expect(resolveAttribution(c, settings)).toBe('@global');
+    expect(resolveAttribution({ ...c, posterLine: ' @her ' }, settings)).toBe('@her');
+    expect(resolveAttribution({ ...c, posterLine: '@her' }, { ...settings, attribution: false })).toBeNull();
+    expect(resolveAttribution(c, { ...settings, handle: '' })).toBeNull();
   });
 });

@@ -6,7 +6,10 @@ export interface PromptContext {
   appName: string;
   ctaStyle: CtaStyle;
   moodEmphasis: MoodEmphasis;
+  /** Quotes already written for this photo (regenerate) — must not be reused. */
   avoid?: string[];
+  /** The user's own note on what to change (regenerate with feedback). */
+  feedback?: string;
 }
 
 /** Original style anchors. Never song lyrics or attributed quotes. */
@@ -109,21 +112,30 @@ const EMPHASIS_TEXT: Record<MoodEmphasis, string> = {
 };
 
 export function buildUserPrompt(c: PromptContext): string {
+  const handle = c.handle.trim();
+  const appName = c.appName.trim();
+  const brandMention = handle ? `"${appName}" (${handle})` : `"${appName}"`;
   const cta: Record<CtaStyle, string> = {
     none: 'none - no call to action in any caption',
     soft: 'soft - a gentle nudge to share or tag someone, no app mention',
-    brand: `brand - mention the app "${c.appName}" (${c.handle}) naturally, in different words each time, one sentence at most`,
+    brand: `brand - mention the app ${brandMention} naturally, in different words each time, one sentence at most`,
   };
+  // A brand CTA needs an app to mention; without one, fall back to the soft nudge.
+  const ctaStyle: CtaStyle = c.ctaStyle === 'brand' && !appName ? 'soft' : c.ctaStyle;
   const lines = [
     'Brand context:',
-    `- account handle: ${c.handle}`,
-    `- app name: ${c.appName}`,
-    `- CTA style: ${cta[c.ctaStyle]}`,
+    `- account handle: ${handle || '(none)'}`,
+    `- app name: ${appName || '(none)'}`,
+    `- CTA style: ${cta[ctaStyle]}`,
     `- mood emphasis: ${EMPHASIS_TEXT[c.moodEmphasis]}`,
   ];
   if (c.avoid?.length) {
     lines.push('', 'Do not reuse or lightly rephrase these quotes already written for this photo:');
     for (const q of c.avoid) lines.push(`- ${q}`);
+  }
+  const feedback = c.feedback?.trim();
+  if (feedback) {
+    lines.push('', 'Feedback from the user on the previous attempt. Apply it to all six variants and their captions; it outranks the mood emphasis above:', feedback);
   }
   lines.push('', 'Study the photo, then return the analysis, six variants and captions as JSON.');
   return lines.join('\n');

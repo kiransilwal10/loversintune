@@ -95,3 +95,13 @@ h1, h2, p { margin: 0; }
 .drawer legend { font-size: 13px; font-weight: 600; padding: 0 6px; }
 
 .toast { position: fixed; left: 50%; bottom: 24px; transform: translateX(-50%); background: var(--ink); color: #fff; padding: 10px 16px; border-radius: 999px; font-size: 14px; box-shadow: var(--shadow); z-index: 30; }
+
+/* per-card poster line + feedback */
+.controls label.wide { grid-column: 1 / -1; }
+.controls input[type="text"] { border: 1px solid var(--line); border-radius: 10px; padding: 8px 34px 8px 10px; background: #fff; color: var(--ink); width: 100%; box-sizing: border-box; }
+.field { position: relative; display: block; }
+.field-clear { position: absolute; right: 6px; top: 50%; transform: translateY(-50%); border: none; background: transparent; color: var(--muted); font-size: 18px; line-height: 1; cursor: pointer; padding: 2px 6px; }
+.field-clear:hover { color: var(--ink); }
+.feedback { display: flex; flex-direction: column; gap: 10px; padding: 12px 14px; border: 1px dashed #d9cfc5; border-radius: 12px; background: #fdf9f6; }
+.feedback label { display: flex; flex-direction: column; gap: 6px; font-size: 13px; font-weight: 600; }
+.feedback textarea { border: 1px solid var(--line); border-radius: 10px; padding: 8px 10px; font: inherit; font-weight: 400; resize: vertical; background: #fff; color: var(--ink); min-height: 44px; }

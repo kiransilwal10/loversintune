@@ -3,6 +3,7 @@ import type { GenerationResult, Variant, StylePreset } from '../lib/schema';
 import type { Zone, ScrimAdjust } from '../lib/layout';
 import { EMPTY_USAGE, addUsage, type UsageSummary } from '../lib/usage';
 import { slugify } from '../lib/download';
+import type { Settings } from '../lib/settings';
 
 export type CardStatus = 'queued' | 'preparing' | 'waiting_key' | 'generating' | 'ready' | 'error' | 'declined';
 export type SizeChoice = 'S' | 'M' | 'L';
@@ -21,8 +22,15 @@ export interface Card {
   zone: Zone | 'auto';
   size: SizeChoice;
   scrim: ScrimAdjust;
+  /** Text drawn under the quote for this poster; blank = the handle from Settings. */
+  posterLine: string;
+  /** The user's note for "Regenerate with feedback". */
+  feedback: string;
   error?: string;
 }
+
+/** The per-card knobs the UI can patch. */
+export type CardOptions = Pick<Card, 'style' | 'zone' | 'size' | 'scrim' | 'posterLine' | 'feedback'>;
 
 export type CardAction =
   | { type: 'add'; cards: Card[] }
@@ -31,7 +39,7 @@ export type CardAction =
   | { type: 'result'; id: string; result: GenerationResult; usage: UsageSummary }
   | { type: 'error'; id: string; message: string; status?: 'error' | 'declined'; usage?: UsageSummary }
   | { type: 'select_variant'; id: string; variantId: string }
-  | { type: 'set_option'; id: string; patch: Partial<Pick<Card, 'style' | 'zone' | 'size' | 'scrim'>> }
+  | { type: 'set_option'; id: string; patch: Partial<CardOptions> }
   | { type: 'remove'; id: string };
 
 export function uniqueStem(base: string, taken: Iterable<string>): string {
@@ -47,12 +55,19 @@ export function newCards(files: File[], takenStems: Iterable<string>): Card[] {
   return files.map((file) => {
     const stem = uniqueStem(slugify(file.name), taken);
     taken.add(stem);
-    return { id: crypto.randomUUID(), file, stem, status: 'queued', usage: EMPTY_USAGE, style: 'auto', zone: 'auto', size: 'M', scrim: 'auto' };
+    return { id: crypto.randomUUID(), file, stem, status: 'queued', usage: EMPTY_USAGE, style: 'auto', zone: 'auto', size: 'M', scrim: 'auto', posterLine: '', feedback: '' };
   });
 }
 
 export function selectedVariant(card: Card): Variant | undefined {
   return card.result?.variants.find((v) => v.id === card.selectedVariantId) ?? card.result?.variants[0];
+}
+
+/** The line drawn under the quote: the card's own line, else the Settings handle; null when off or empty. */
+export function resolveAttribution(card: Card, settings: Settings): string | null {
+  if (!settings.attribution) return null;
+  const line = card.posterLine.trim() || settings.handle.trim();
+  return line || null;
 }
 
 const patchCard = (state: Card[], id: string, fn: (c: Card) => Card): Card[] => state.map((c) => (c.id === id ? fn(c) : c));

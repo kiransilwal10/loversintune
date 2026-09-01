@@ -18,8 +18,9 @@ export function SettingsDrawer({ open, settings, onChange, onClose }: { open: bo
         </label>
         <p className="hint">Stored only in this browser and sent straight to Anthropic. Don't enter it on a shared computer. <button className="link" onClick={() => set('apiKey', '')}>Forget key</button></p>
 
-        <label>Brand handle<input value={settings.handle} onChange={(e) => set('handle', e.target.value)} /></label>
-        <label>App name<input value={settings.appName} onChange={(e) => set('appName', e.target.value)} /></label>
+        <label>Your handle (drawn under quotes)<input value={settings.handle} placeholder="@yourhandle — optional" onChange={(e) => set('handle', e.target.value)} /></label>
+        <p className="hint">Each poster card also has its own "Line under the quote" box to override this.</p>
+        <label>App or brand name<input value={settings.appName} placeholder="Optional — only used by the Brand CTA" onChange={(e) => set('appName', e.target.value)} /></label>
         <label>Caption CTA
           <select value={settings.ctaStyle} onChange={(e) => set('ctaStyle', e.target.value as CtaStyle)}>
             <option value="none">None</option>
@@ -27,6 +28,9 @@ export function SettingsDrawer({ open, settings, onChange, onClose }: { open: bo
             <option value="brand">Brand — mention the app</option>
           </select>
         </label>
+        {settings.ctaStyle === 'brand' && !settings.appName.trim() && (
+          <p className="hint">Add an app or brand name above, or captions will fall back to the soft nudge.</p>
+        )}
         <label>Mood emphasis
           <select value={settings.moodEmphasis} onChange={(e) => set('moodEmphasis', e.target.value as MoodEmphasis)}>
             <option value="balanced">Balanced</option>
@@ -55,7 +59,7 @@ export function SettingsDrawer({ open, settings, onChange, onClose }: { open: bo
             <option value="image/png">PNG</option>
           </select>
         </label>
-        <label className="check"><input type="checkbox" checked={settings.attribution} onChange={(e) => set('attribution', e.target.checked)} /> Add my handle under the quote</label>
+        <label className="check"><input type="checkbox" checked={settings.attribution} onChange={(e) => set('attribution', e.target.checked)} /> Draw a line under the quote (your handle, or each card's own line)</label>
       </aside>
     </div>
   );

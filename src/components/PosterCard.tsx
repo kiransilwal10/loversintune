@@ -2,11 +2,11 @@ import { useEffect, useRef, useState } from 'react';
 import { PRESETS, PRESET_ORDER, type PresetId } from '../lib/layout';
 import type { Settings } from '../lib/settings';
 import { MOOD_LABELS } from '../lib/labels';
-import { selectedVariant, type Card, type CardStatus } from '../state/cards';
+import { selectedVariant, type Card, type CardOptions, type CardStatus } from '../state/cards';
 import { usePosterCanvas } from '../hooks/usePosterCanvas';
 import { PlatformTabs } from './PlatformTabs';
 import { VariantChips } from './VariantChips';
-import { StyleControls, type StyleValues } from './StyleControls';
+import { StyleControls } from './StyleControls';
 import { CaptionBox } from './CaptionBox';
 
 interface Props {
@@ -14,9 +14,10 @@ interface Props {
   settings: Settings;
   guides: boolean;
   onSelectVariant: (id: string) => void;
-  onOption: (patch: Partial<StyleValues>) => void;
+  onOption: (patch: Partial<CardOptions>) => void;
   onRetry: () => void;
-  onRegenerate: () => void;
+  /** withFeedback = send the card's feedback note along with the regenerate request. */
+  onRegenerate: (withFeedback: boolean) => void;
   onRemove: () => void;
   onDownload: (preset: PresetId) => Promise<void>;
   onDownloadZip: () => Promise<void>;
@@ -95,7 +96,12 @@ export function PosterCard(p: Props) {
               {variant.quote}
               <footer>{MOOD_LABELS[variant.mood]} · {variant.why_it_fits}</footer>
             </blockquote>
-            <StyleControls values={{ style: p.card.style, zone: p.card.zone, size: p.card.size, scrim: p.card.scrim }} autoStyle={variant.style_preset} onChange={p.onOption} />
+            <StyleControls
+              values={{ style: p.card.style, zone: p.card.zone, size: p.card.size, scrim: p.card.scrim, posterLine: p.card.posterLine }}
+              autoStyle={variant.style_preset}
+              globalHandle={p.settings.attribution ? p.settings.handle.trim() : ''}
+              onChange={p.onOption}
+            />
             <div className="actions">
               <button className="btn primary" disabled={!!busy} onClick={() => run('download', () => p.onDownload(preset))}>
                 {busy === 'download' ? 'Rendering…' : `Download ${PRESETS[preset].label}`}
@@ -103,7 +109,20 @@ export function PosterCard(p: Props) {
               <button className="btn" disabled={!!busy} onClick={() => run('zip', p.onDownloadZip)}>
                 {busy === 'zip' ? 'Zipping…' : 'All sizes + captions (zip)'}
               </button>
-              <button className="btn ghost" onClick={p.onRegenerate}>Regenerate quotes</button>
+            </div>
+            <div className="feedback">
+              <label>Not quite right? Tell Claude what to change
+                <textarea
+                  rows={2}
+                  value={p.card.feedback}
+                  placeholder="e.g. sadder · mention the rain · less cheesy · shorter lines · captions without the weather hashtags"
+                  onChange={(e) => p.onOption({ feedback: e.target.value })}
+                />
+              </label>
+              <div className="actions">
+                <button className="btn primary" disabled={!p.card.feedback.trim()} onClick={() => p.onRegenerate(true)}>Regenerate with feedback</button>
+                <button className="btn ghost" onClick={() => p.onRegenerate(false)}>Fresh spin (no notes)</button>
+              </div>
             </div>
             <CaptionBox label="TikTok caption" text={variant.caption_tiktok} />
             <CaptionBox label="Instagram caption" text={variant.caption_instagram} />

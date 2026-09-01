@@ -35,4 +35,8 @@ describe('settings', () => {
     expect(DEFAULT_SETTINGS.exportFormat).toBe('image/jpeg');
     expect(DEFAULT_SETTINGS.ctaStyle).toBe('soft');
   });
+  it('ships brand-neutral: no handle or app name until the user sets one', () => {
+    expect(DEFAULT_SETTINGS.handle).toBe('');
+    expect(DEFAULT_SETTINGS.appName).toBe('');
+  });
 });
